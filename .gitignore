@@ -1,2 +1,4 @@
 spyproject
 spyproject/
+*.bak
+*.autosave.py
