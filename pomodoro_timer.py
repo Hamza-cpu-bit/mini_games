@@ -1,25 +1,32 @@
 import time
 import platform
 import os
+import subprocess
+
+def install_beep():
+    try:
+        print("🔧 Installing 'beep'...")
+        subprocess.run(["sudo", "apt", "update"], check=True)
+        subprocess.run(["sudo", "apt", "install", "-y", "beep"], check=True)
+        print("✅ 'beep' installed successfully.")
+    except subprocess.CalledProcessError:
+        print("❌ Failed to install 'beep'. Please install it manually.")
 
 def play_sound():
     os_name = platform.system()
 
     if os_name == "Windows":
         import winsound
-        frequency = 1000  # Hz
-        duration = 800    # ms
-        winsound.Beep(frequency, duration)
+        winsound.Beep(1000, 800)
 
     elif os_name == "Darwin":  # macOS
         os.system('say "Time\'s up!"')
 
     elif os_name == "Linux":
-        # Check if beep is available
-        if os.system("which beep > /dev/null") == 0:
-            os.system("beep -f 1000 -l 500")
-        else:
-            print("🔔 Time's up! (Install 'beep' for actual sound)")
+        if os.system("which beep > /dev/null") != 0:
+            install_beep()
+        os.system("beep -f 1000 -l 500")
+
     else:
         print("🔔 Time's up!")
 
