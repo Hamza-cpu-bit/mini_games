@@ -1,42 +1,83 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  7 11:35:41 2025
-
-@author: nazar
-"""
-
+import tkinter as tk
+from tkinter import messagebox
 import random
 
-def hangman():
-    words = ["python", "banana", "anaconda", "science", "keyboard","city","dubai","hello"]
-    word = random.choice(words)
-    guessed = set()
-    tries = 6
+WORDS = [
+    "python", "hangman", "developer", "programming", "interface", "keyboard",
+    "language", "software", "hardware", "window", "debug", "function",
+    "variable", "exception", "object", "inheritance", "compiler", "binary"
+]
 
-    print("🎮 Let's play Hangman!")
+MAX_ATTEMPTS = 6
 
-    while tries > 0:
-        display = [letter if letter in guessed else "_" for letter in word]
-        print("Word:", " ".join(display))
+class HangmanGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("🎯 Hangman Game")
+        self.root.geometry("400x400")
+        self.root.resizable(False, False)
 
-        if "_" not in display:
-            print("🎉 You won!")
+        self.word = random.choice(WORDS)
+        self.display_word = ["_" for _ in self.word]
+        self.guessed_letters = set()
+        self.attempts_left = MAX_ATTEMPTS
+
+        self.title_label = tk.Label(root, text="Hangman", font=("Arial", 20, "bold"))
+        self.title_label.pack(pady=10)
+
+        self.word_label = tk.Label(root, text=" ".join(self.display_word), font=("Courier", 24))
+        self.word_label.pack(pady=20)
+
+        self.entry = tk.Entry(root, font=("Arial", 16), justify="center")
+        self.entry.pack()
+        self.entry.focus()
+
+        self.submit_button = tk.Button(root, text="Guess", command=self.check_letter)
+        self.submit_button.pack(pady=10)
+
+        self.status_label = tk.Label(root, text=f"Attempts left: {self.attempts_left}", font=("Arial", 12))
+        self.status_label.pack(pady=5)
+
+        self.guessed_label = tk.Label(root, text="Guessed letters: ", font=("Arial", 12))
+        self.guessed_label.pack()
+
+    def check_letter(self):
+        guess = self.entry.get().lower().strip()
+        self.entry.delete(0, tk.END)
+
+        if not guess or len(guess) != 1 or not guess.isalpha():
+            messagebox.showwarning("Invalid input", "Please enter a single alphabet.")
             return
 
-        guess = input("Guess a letter: ").lower()
+        if guess in self.guessed_letters:
+            self.status_label.config(text=f"You already guessed '{guess}'.")
+            return
 
-        if guess in guessed:
-            print("⚠️ Already guessed.")
-        elif guess in word:
-            print("✅ Good guess!")
-            guessed.add(guess)
+        self.guessed_letters.add(guess)
+
+        if guess in self.word:
+            for i, letter in enumerate(self.word):
+                if letter == guess:
+                    self.display_word[i] = guess
         else:
-            print("❌ Wrong!")
-            guessed.add(guess)
-            tries -= 1
-            print(f"Tries left: {tries}")
+            self.attempts_left -= 1
 
-    print(f"💀 You lost. The word was: {word}")
+        self.update_display()
 
-hangman()
+    def update_display(self):
+        self.word_label.config(text=" ".join(self.display_word))
+        self.status_label.config(text=f"Attempts left: {self.attempts_left}")
+        self.guessed_label.config(text=f"Guessed letters: {', '.join(sorted(self.guessed_letters))}")
+
+        if "_" not in self.display_word:
+            messagebox.showinfo("You Win!", f"🎉 Congratulations! The word was: {self.word}")
+            self.root.destroy()
+
+        elif self.attempts_left == 0:
+            messagebox.showerror("Game Over", f"💀 You lost! The word was: {self.word}")
+            self.root.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    game = HangmanGUI(root)
+    root.mainloop()

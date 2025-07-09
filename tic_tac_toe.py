@@ -1,49 +1,76 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  7 12:01:21 2025
+import tkinter as tk
+from tkinter import messagebox
 
-@author: nazar
-"""
+class TicTacToe:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Tic-Tac-Toe ✖️⭕")
 
-def print_board(board):
-    for row in board:
-        print(" | ".join(row))
-        print("-" * 5)
+        self.current_player = "X"
+        self.board = [["" for _ in range(3)] for _ in range(3)]
 
-def check_winner(board, player):
-    for row in board:
-        if all(cell == player for cell in row): return True
-    for col in range(3):
-        if all(board[row][col] == player for row in range(3)): return True
-    if all(board[i][i] == player for i in range(3)): return True
-    if all(board[i][2 - i] == player for i in range(3)): return True
-    return False
+        self.buttons = [[None for _ in range(3)] for _ in range(3)]
+        self.create_ui()
 
-def tic_tac_toe():
-    board = [[" "]*3 for _ in range(3)]
-    players = ["X", "O"]
-    turn = 0
+    def create_ui(self):
+        tk.Label(self.root, text="Tic Tac Toe", font=("Arial", 20, "bold")).pack(pady=10)
 
-    for _ in range(9):
-        print_board(board)
-        player = players[turn % 2]
-        try:
-            row = int(input(f"{player}'s Turn - Row (0-2): "))
-            col = int(input("Col (0-2): "))
-            if board[row][col] == " ":
-                board[row][col] = player
-                if check_winner(board, player):
-                    print_board(board)
-                    print(f"{player} wins!")
-                    return
-                turn += 1
+        self.frame = tk.Frame(self.root)
+        self.frame.pack()
+
+        for row in range(3):
+            for col in range(3):
+                button = tk.Button(self.frame, text="", font=("Arial", 32), width=4, height=1,
+                                   command=lambda r=row, c=col: self.make_move(r, c))
+                button.grid(row=row, column=col)
+                self.buttons[row][col] = button
+
+        self.status_label = tk.Label(self.root, text="Player X's turn", font=("Arial", 14))
+        self.status_label.pack(pady=10)
+
+        self.reset_button = tk.Button(self.root, text="Reset Game", command=self.reset_game)
+        self.reset_button.pack()
+
+    def make_move(self, row, col):
+        if self.board[row][col] == "":
+            self.board[row][col] = self.current_player
+            self.buttons[row][col].config(text=self.current_player, state="disabled")
+
+            if self.check_winner(self.current_player):
+                messagebox.showinfo("🎉 Winner!", f"Player {self.current_player} wins!")
+                self.disable_all_buttons()
+            elif self.is_draw():
+                messagebox.showinfo("Draw", "It's a draw!")
             else:
-                print("Cell already taken!")
-        except:
-            print("Invalid input. Try again.")
-    print_board(board)
-    print("It's a draw!")
+                self.current_player = "O" if self.current_player == "X" else "X"
+                self.status_label.config(text=f"Player {self.current_player}'s turn")
+
+    def check_winner(self, player):
+        # Check rows, columns, diagonals
+        return any(
+            all(self.board[r][c] == player for c in range(3)) or
+            all(self.board[c][r] == player for c in range(3)) for r in range(3)
+        ) or all(self.board[i][i] == player for i in range(3)) or \
+               all(self.board[i][2 - i] == player for i in range(3))
+
+    def is_draw(self):
+        return all(self.board[r][c] != "" for r in range(3) for c in range(3))
+
+    def disable_all_buttons(self):
+        for row in self.buttons:
+            for btn in row:
+                btn.config(state="disabled")
+
+    def reset_game(self):
+        self.current_player = "X"
+        self.board = [["" for _ in range(3)] for _ in range(3)]
+        self.status_label.config(text="Player X's turn")
+        for row in self.buttons:
+            for btn in row:
+                btn.config(text="", state="normal")
+
 
 if __name__ == "__main__":
-    tic_tac_toe()
+    root = tk.Tk()
+    game = TicTacToe(root)
+    root.mainloop()
