@@ -5,7 +5,7 @@ import random
 WORDS = [
     "python", "hangman", "developer", "programming", "interface", "keyboard",
     "language", "software", "hardware", "window", "debug", "function",
-    "variable", "exception", "object", "inheritance", "compiler", "binary", "sex", "girl x boy", "room"
+    "variable", "exception", "object", "inheritance", "compiler", "binary", "room"
 ]
 
 MAX_ATTEMPTS = 6
